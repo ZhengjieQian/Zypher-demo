@@ -37,17 +37,17 @@ export default function Home() {
         <form onSubmit={onSend} style={{ display: "flex", gap: 8, width: "100%", maxWidth: 720 }}>
           <input
             type="text"
-            placeholder="输入你的问题，比如：帮我写一个待办列表"
+            placeholder="Enter your question, e.g.: Write a todo list"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             style={{ flex: 1, padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
           />
           <button disabled={loading || !prompt.trim()} style={{ padding: "10px 14px", borderRadius: 8 }}>
-            {loading ? "发送中..." : "发送"}
+            {loading ? "Sending..." : "Send"}
           </button>
         </form>
         <div style={{ marginTop: 16, width: "100%", maxWidth: 720 }}>
-          {error && <div style={{ color: "#d00" }}>错误：{error}</div>}
+          {error && <div style={{ color: "#d00" }}>Error: {error}</div>}
           {reply && (
             <div style={{ whiteSpace: "pre-wrap", background: "#111", color: "#eee", padding: 16, borderRadius: 8 }}>
               {reply}
