@@ -1,22 +1,22 @@
 ## Zypher Agent + Next.js
 
-一个使用 [Zypher](https://zypher.corespeed.io/) 打造的最简 AI Agent Web 示例（Next.js App Router + TypeScript）。前端一个输入框，调用 `/api/agent`，后端用 Zypher 运行任务；当 Zypher 的 OpenAI 提供者不接受项目密钥时，会自动回退到直连 OpenAI API，确保功能可用。
+A minimal AI Agent web demo built with [Zypher](https://zypher.corespeed.io/) (Next.js App Router + TypeScript). The frontend has a single input box calling `/api/agent`; the backend runs a Zypher agent task. If the Zypher OpenAI provider rejects a project key, the endpoint automatically falls back to a direct OpenAI API call so functionality remains available.
 
 ---
 
-### 一、准备环境变量
+### 1. Environment Variable
 
-在项目根目录创建或编辑 `.env.local`（默认不纳入 Git）：
+Create or edit `.env.local` (ignored by Git by default) in the project root:
 
 ```
-OPENAI_API_KEY=sk-你的真实密钥
+OPENAI_API_KEY=sk-your-real-key
 ```
 
-说明：
-- 支持传统用户密钥 `sk-...`；项目密钥 `sk-proj-...` 在部分提供者上可能 401，本项目已做 fallback 直连 OpenAI。
-- 请不要把密钥提交到仓库或贴到聊天/日志中。
+Notes:
+- Supports classic user keys `sk-...`. Project keys `sk-proj-...` may produce 401 with the provider; this project implements a fallback to direct OpenAI.
+- Never commit your key or paste it in logs/chats.
 
-### 二、安装与启动
+### 2. Install & Run
 
 ```powershell
 cd D:\Zypher\zypher-next
@@ -24,42 +24,42 @@ npm install
 npm run dev
 ```
 
-打开浏览器访问 `http://localhost:3000`（如端口被占用会切换到 3002，以控制台为准）。
+Open `http://localhost:3000` (if the port is busy it may switch to 3002; check the console output).
 
-### 三、使用方法
+### 3. Usage
 
-- 页面输入任意中文/英文问题并发送；
-- 或命令行（PowerShell）直接调用：
+- Enter any question (English or Chinese) in the page and send.
+- Or call from PowerShell directly:
 
 ```powershell
-Invoke-RestMethod -Uri http://localhost:3000/api/agent -Method POST -Body (@{prompt='给我三个代办事项';timeoutMs=120000} | ConvertTo-Json) -ContentType 'application/json'
+Invoke-RestMethod -Uri http://localhost:3000/api/agent -Method POST -Body (@{prompt='Give me three todo items';timeoutMs=120000} | ConvertTo-Json) -ContentType 'application/json'
 ```
 
-请求体参数：
-- `prompt`：用户输入（必填）
-- `model`：模型名（默认 `gpt-4o-mini`）
-- `maxTokens`：生成上限，范围 16~4096
-- `timeoutMs`：任务超时（默认 60000，支持 5000~300000）
+Request body parameters:
+- `prompt`: User input (required)
+- `model`: Model name (default `gpt-4o-mini`)
+- `maxTokens`: Generation upper bound (range 16–4096)
+- `timeoutMs`: Task timeout (default 60000, supported 5000–300000)
 
-响应字段：
-- `reply`：文本答案
-- `model`：使用的模型
-- `maxTokens`、`timeoutMs`：实际配置
-- `fallback`：当为 `true` 时表示本次使用了直连 OpenAI 的回退逻辑
+Response fields:
+- `reply`: Text answer
+- `model`: Actual model used
+- `maxTokens`, `timeoutMs`: Effective configuration
+- `fallback`: `true` when direct OpenAI fallback path was used
 
-### 四、关键文件
+### 4. Key Files
 
-- 页面：`src/app/page.tsx`
-- API 路由：`src/app/api/agent/route.ts`
+- Page: `src/app/page.tsx`
+- API Route: `src/app/api/agent/route.ts`
 
-### 五、实现说明（Node 兼容）
+### 5. Implementation (Node Compatibility)
 
-- Zypher 来自 JSR，默认面向 Deno 运行时。为在 Next.js/Node 中使用，`route.ts` 在动态导入之前注入了一个最小可用的 `Deno` polyfill（基于 Node 的 fs/os 实现）。
-- 当 Zypher 的 `OpenAIModelProvider` 因项目密钥返回 401 时，路由会自动回退到 `https://api.openai.com/v1/chat/completions`，保证功能不中断。
+- Zypher targets Deno by default (JSR). To run under Next.js/Node, `route.ts` injects a minimal `Deno` polyfill (fs/os) before dynamically importing Zypher.
+- If Zypher's `OpenAIModelProvider` returns 401 for a project key, the route falls back to `https://api.openai.com/v1/chat/completions` to keep responses working.
 
-### 六、常见问题
+### 6. FAQ / Troubleshooting
 
-- 401 / Unauthorized：通常是读取到错误的 Key（如之前的占位符），或项目密钥在提供者不被接受。清理 PowerShell 临时环境变量并重启服务：
+- 401 / Unauthorized: Usually a bad key (placeholder) or a project key not accepted by the provider. Clear the temporary PowerShell variable and restart:
 
 ```powershell
 Remove-Item Env:OPENAI_API_KEY
@@ -67,21 +67,20 @@ cd D:\Zypher\zypher-next
 npm run dev
 ```
 
-- 仍是 HTML 错误页：请打开浏览器 DevTools → Network，查看 `POST /api/agent` 的响应内容和状态码，把 JSON 错误发出来排查。
+- HTML error page instead of JSON: Open browser DevTools → Network, inspect `POST /api/agent` response body & status code; share the JSON error for diagnosis.
 
-### 七、Git 提交与推送
+### 7. Git Commit & Push
 
-已在本仓库清空 `.env.local` 内容并默认忽略 `.env*` 文件。推送前请确认没有泄露密钥。
+`.env.local` is cleared and `.env*` patterns are ignored. Confirm no secrets before pushing.
 
 ```powershell
 cd D:\Zypher\zypher-next
 git add .
 git commit -m "docs: usage guide; chore: clear env placeholder"
-# 首次推送需设置远程：
 git remote add origin https://github.com/<your-username>/<your-repo>.git
 git branch -M main
 git push -u origin main
 ```
 
-需要我把远程地址配置好并直接推送，请提供 GitHub 仓库地址。 
+If you want me to configure and push to a remote for you, provide the GitHub repository URL.
 
