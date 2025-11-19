@@ -1,64 +1,58 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
 import styles from "./page.module.css";
 
 export default function Home() {
+  const [prompt, setPrompt] = useState("");
+  const [reply, setReply] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setReply("");
+    try {
+      const res = await fetch("/api/agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Request failed");
+      setReply(data.reply || "");
+    } catch (err: any) {
+      setError(err?.message || "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <h1>Zypher Agent Demo</h1>
+        <form onSubmit={onSend} style={{ display: "flex", gap: 8, width: "100%", maxWidth: 720 }}>
+          <input
+            type="text"
+            placeholder="输入你的问题，比如：帮我写一个待办列表"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            style={{ flex: 1, padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
+          />
+          <button disabled={loading || !prompt.trim()} style={{ padding: "10px 14px", borderRadius: 8 }}>
+            {loading ? "发送中..." : "发送"}
+          </button>
+        </form>
+        <div style={{ marginTop: 16, width: "100%", maxWidth: 720 }}>
+          {error && <div style={{ color: "#d00" }}>错误：{error}</div>}
+          {reply && (
+            <div style={{ whiteSpace: "pre-wrap", background: "#111", color: "#eee", padding: 16, borderRadius: 8 }}>
+              {reply}
+            </div>
+          )}
         </div>
       </main>
     </div>
