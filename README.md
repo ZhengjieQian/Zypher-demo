@@ -19,7 +19,7 @@ Notes:
 ### 2. Install & Run
 
 ```powershell
-cd D:\Zypher\zypher-next
+cd your-path
 npm install
 npm run dev
 ```
@@ -51,36 +51,3 @@ Response fields:
 
 - Page: `src/app/page.tsx`
 - API Route: `src/app/api/agent/route.ts`
-
-### 5. Implementation (Node Compatibility)
-
-- Zypher targets Deno by default (JSR). To run under Next.js/Node, `route.ts` injects a minimal `Deno` polyfill (fs/os) before dynamically importing Zypher.
-- If Zypher's `OpenAIModelProvider` returns 401 for a project key, the route falls back to `https://api.openai.com/v1/chat/completions` to keep responses working.
-
-### 6. FAQ / Troubleshooting
-
-- 401 / Unauthorized: Usually a bad key (placeholder) or a project key not accepted by the provider. Clear the temporary PowerShell variable and restart:
-
-```powershell
-Remove-Item Env:OPENAI_API_KEY
-cd D:\Zypher\zypher-next
-npm run dev
-```
-
-- HTML error page instead of JSON: Open browser DevTools → Network, inspect `POST /api/agent` response body & status code; share the JSON error for diagnosis.
-
-### 7. Git Commit & Push
-
-`.env.local` is cleared and `.env*` patterns are ignored. Confirm no secrets before pushing.
-
-```powershell
-cd D:\Zypher\zypher-next
-git add .
-git commit -m "docs: usage guide; chore: clear env placeholder"
-git remote add origin https://github.com/<your-username>/<your-repo>.git
-git branch -M main
-git push -u origin main
-```
-
-If you want me to configure and push to a remote for you, provide the GitHub repository URL.
-
